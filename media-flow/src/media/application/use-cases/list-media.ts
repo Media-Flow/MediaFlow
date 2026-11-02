@@ -11,12 +11,12 @@ import { MEDIA_REPOSITORY } from '../ports/media.repository.port';
 export class ListMedia {
   constructor(
     @Inject(MEDIA_REPOSITORY)
-    private readonly userRepository: MediaRepositoryPort,
+    private readonly mediaRepository: MediaRepositoryPort,
   ) {}
   async execute(
     filter: MediaFilter,
     pagination: PageRequest,
   ): Promise<Page<Media>> {
-    return this.userRepository.findMany(filter, pagination);
+    return this.mediaRepository.findMany(filter, pagination);
   }
 }

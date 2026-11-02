@@ -90,16 +90,11 @@ export class DrizzleMediaRepository implements MediaRepositoryPort {
         ),
       );
 
-    console.log('DB uploadId:', data?.uploadId);
-
     if (!data) {
       return null;
     }
 
-    const entity = toDomain(data);
-    console.log('Domain uploadId:', entity.uploadId);
-
-    return entity;
+    return toDomain(data);
   }
 
   async findMany(

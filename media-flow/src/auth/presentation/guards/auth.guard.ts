@@ -14,12 +14,15 @@ import type { Response } from 'express';
 import { AuthenticatedRequest } from './authenticated-request';
 import { Reflector } from '@nestjs/core';
 import { Public } from '../../../shared/presentation/decorator/public.decorator';
+import { APP_LOGGER } from '../../../shared/application/ports/logger.port';
+import type { LoggerPort } from '../../../shared/application/ports/logger.port';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     @Inject(AUTH_SERVICE) private readonly authService: AuthServicePort,
     private readonly reflector: Reflector,
+    @Inject(APP_LOGGER) private readonly logger: LoggerPort,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.reflector.get(Public, context.getHandler())) {
@@ -29,10 +32,12 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const response: Response = context.switchToHttp().getResponse();
     const sealedSession = request.cookies?.['wos-session'];
-    console.log('[AuthGuard] Cookies', request.cookies);
-    console.log('[AuthGuard] sealedSession', sealedSession);
 
     if (!sealedSession) {
+      this.logger.warn(
+        AuthGuard.name,
+        'Authentication rejected: session cookie is missing',
+      );
       throw new UnauthorizedException('No such session found');
     }
 

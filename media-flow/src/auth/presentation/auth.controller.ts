@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Inject,
   Query,
   Redirect,
   Req,
@@ -12,6 +13,8 @@ import type { Response, Request } from 'express';
 import { Public } from '../../shared/presentation/decorator/public.decorator';
 import { Logout } from '../application/use-cases/logout';
 import { ConfigService } from '@nestjs/config';
+import { APP_LOGGER } from '../../shared/application/ports/logger.port';
+import type { LoggerPort } from '../../shared/application/ports/logger.port';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +22,7 @@ export class AuthController {
     private readonly loginUseCase: Authentication,
     private readonly logoutUseCase: Logout,
     private readonly configService: ConfigService,
+    @Inject(APP_LOGGER) private readonly logger: LoggerPort,
   ) {}
 
   @Public()
@@ -40,7 +44,7 @@ export class AuthController {
     }
 
     const { sealedSession } = await this.loginUseCase.callback(code);
-    console.log('[callback Controller]: sealedSession', sealedSession);
+    this.logger.log(AuthController.name, 'Authentication callback completed');
     res.cookie('wos-session', sealedSession, {
       path: '/',
       httpOnly: true,
@@ -59,13 +63,11 @@ export class AuthController {
     const sealedSession = request.cookies?.['wos-session'];
     response.clearCookie('wos-session');
 
-    console.log('[logout Controller]: sealedSession:', sealedSession);
     const returnTo: string =
       this.configService.getOrThrow<string>('APP_LOGIN_URL');
 
-    console.log('[logout Controller]: returnTo:', returnTo);
     const url = await this.logoutUseCase.execute(sealedSession, returnTo);
-    console.log('[logout Controller]: url:', url);
+    this.logger.log(AuthController.name, 'Logout redirect generated');
     return { url };
   }
 

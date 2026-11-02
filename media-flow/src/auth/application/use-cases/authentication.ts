@@ -7,12 +7,15 @@ import { AUTH_SERVICE } from '../ports/auth.port';
 import type { AuthServicePort } from '../ports/auth.port';
 import { RegisterUser } from '../../../user/application/use-cases/register-user';
 import { User } from '../../../user/domain/user.entity';
+import { APP_LOGGER } from '../../../shared/application/ports/logger.port';
+import type { LoggerPort } from '../../../shared/application/ports/logger.port';
 
 @Injectable()
 export class Authentication {
   constructor(
     @Inject(AUTH_SERVICE) private readonly authService: AuthServicePort,
     private readonly registerUser: RegisterUser,
+    @Inject(APP_LOGGER) private readonly logger: LoggerPort,
   ) {}
 
   redirect(state?: string): string {
@@ -21,7 +24,10 @@ export class Authentication {
 
   async callback(code: string): Promise<{ sealedSession: string; user: User }> {
     const identity = await this.authService.authenticateWithCode(code);
-    console.log('[callback Use-Case]: identity: ', identity);
+    this.logger.log(
+      Authentication.name,
+      'Registering authenticated WorkOS user',
+    );
     const user = await this.registerUser.execute({
       externalId: identity.externalId,
       firstName: identity.firstName ?? '',
@@ -43,6 +49,7 @@ export class Authentication {
       );
     }
 
+    this.logger.log(Authentication.name, 'User authentication completed');
     return { sealedSession: refreshed.sealedSession, user };
   }
 }

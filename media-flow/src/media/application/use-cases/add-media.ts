@@ -6,6 +6,8 @@ import type { StoragePort } from '../ports/storage.port';
 import { Media, MediaType, PART_SIZE } from '../../domain';
 import { randomUUID } from 'node:crypto';
 import { PresignedPartUrl } from '../../infrastructure/adapters/s3-storage.adapter';
+import { APP_LOGGER } from '../../../shared/application/ports/logger.port';
+import type { LoggerPort } from '../../../shared/application/ports/logger.port';
 
 export interface AddMediaInput {
   ownerId: string;
@@ -30,6 +32,7 @@ export class AddMedia {
     @Inject(MEDIA_REPOSITORY)
     private readonly mediaRepository: MediaRepositoryPort,
     @Inject(STORAGE) private readonly storageService: StoragePort,
+    @Inject(APP_LOGGER) private readonly logger: LoggerPort,
   ) {}
   async execute(input: AddMediaInput): Promise<AddMediaOutput> {
     const data = await this.mediaRepository.findByTitle(input.title);
@@ -48,6 +51,7 @@ export class AddMedia {
       isPrivate: input.isPrivate,
     });
 
+    this.logger.log(AddMedia.name, `Starting upload for mediaId=${media.id}`);
     await this.mediaRepository.save(media);
 
     const UploadId = await this.storageService.createMultipartUpload(
@@ -57,6 +61,10 @@ export class AddMedia {
     media.attachUploadId(UploadId);
 
     await this.mediaRepository.save(media);
+    this.logger.log(
+      AddMedia.name,
+      `Multipart upload initialized for mediaId=${media.id}; status=${media.status}`,
+    );
 
     const urls = await this.storageService.presignPartUrls({
       key: media.sourceKey,

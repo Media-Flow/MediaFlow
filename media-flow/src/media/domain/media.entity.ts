@@ -125,8 +125,8 @@ export class Media {
   }
 
   attachUploadId(uploadId: string): void {
-    this.markInitiating();
     this.uploadId = uploadId;
+    this.setStatus(MediaStatus.UPLOADING);
   }
 
   private setStatus(status: MediaStatus): void {

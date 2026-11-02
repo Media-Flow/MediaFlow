@@ -19,11 +19,14 @@ import {
   WorkOS,
 } from '@workos-inc/node';
 import { ConfigService } from '@nestjs/config';
+import { APP_LOGGER } from '../../../shared/application/ports/logger.port';
+import type { LoggerPort } from '../../../shared/application/ports/logger.port';
 @Injectable()
 export class WorkosAuthProvider implements AuthServicePort {
   constructor(
     @Inject(WORKOS_PROVIDER) private readonly workos: WorkOS,
     private readonly configService: ConfigService,
+    @Inject(APP_LOGGER) private readonly logger: LoggerPort,
   ) {}
   login(state?: string): string {
     return this.workos.userManagement.getAuthorizationUrl({
@@ -63,7 +66,10 @@ export class WorkosAuthProvider implements AuthServicePort {
       );
     }
 
-    console.log('[authenticateWithCode]: sealedSession', sealedSession);
+    this.logger.log(
+      WorkosAuthProvider.name,
+      'WorkOS authorization code authenticated successfully',
+    );
 
     return {
       sealedSession,
@@ -111,9 +117,9 @@ export class WorkosAuthProvider implements AuthServicePort {
         appUserId: this.extractAppUserId(result.session?.accessToken),
       };
     } else if (result.retryable) {
-      console.warn(
-        'Transient refresh failure; session preserved.',
-        result.reason,
+      this.logger.warn(
+        WorkosAuthProvider.name,
+        'Transient WorkOS session refresh failure; session preserved',
       );
       return { authenticated: false, retryable: true };
     } else {

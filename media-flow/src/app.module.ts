@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/presentation/guards/auth.guard';
 import { RoleGuard } from './auth/presentation/guards/role.guard';
+import { LoggingModule } from './shared/infrastructure/logging/logging.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RoleGuard } from './auth/presentation/guards/role.guard';
       isGlobal: true,
     }),
     DrizzleModule,
+    LoggingModule,
     S3Module,
     WorkosModule,
     UserModule,

@@ -11,6 +11,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/presentation/guards/auth.guard';
 import { RoleGuard } from './auth/presentation/guards/role.guard';
 import { LoggingModule } from './shared/infrastructure/logging/logging.module';
+import { MessageQueueModule } from './shared/infrastructure/queue/queue.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { LoggingModule } from './shared/infrastructure/logging/logging.module';
     UserModule,
     MediaModule,
     AuthModule,
+    MessageQueueModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthGuard },

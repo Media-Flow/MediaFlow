@@ -11,8 +11,10 @@ import { UpdateMedia } from './application/use-cases/update-media';
 import { GetUploadPartUrls } from './application/use-cases/get-upload-part-urls';
 import { STORAGE } from './application/ports/storage.port';
 import { S3StorageAdapter } from './infrastructure/adapters/s3-storage.adapter';
+import { OutBoxModule } from '../outbox/outbox.module';
 
 @Module({
+  imports: [OutBoxModule],
   providers: [
     {
       provide: MEDIA_REPOSITORY,

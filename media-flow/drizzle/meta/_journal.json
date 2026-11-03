@@ -15,6 +15,13 @@
       "when": 1792102665288,
       "tag": "0001_sparkling_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793671152522,
+      "tag": "0002_add-transcode-outbox",
+      "breakpoints": true
     }
   ]
 }

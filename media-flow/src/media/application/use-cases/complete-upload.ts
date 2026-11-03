@@ -11,6 +11,7 @@ import { MEDIA_REPOSITORY } from '../ports/media.repository.port';
 import { MediaStatus } from '../../domain';
 import { APP_LOGGER } from '../../../shared/application/ports/logger.port';
 import type { LoggerPort } from '../../../shared/application/ports/logger.port';
+import { AddEvent } from '../../../outbox/application/use-case/add-event';
 
 @Injectable()
 export class CompleteUpload {
@@ -19,6 +20,7 @@ export class CompleteUpload {
     @Inject(MEDIA_REPOSITORY)
     private readonly mediaRepository: MediaRepositoryPort,
     @Inject(APP_LOGGER) private readonly logger: LoggerPort,
+    private readonly addEvent: AddEvent,
   ) {}
   async execute(mediaId: string): Promise<void> {
     this.logger.log(
@@ -80,6 +82,10 @@ export class CompleteUpload {
 
       media.startProcessing();
       await this.mediaRepository.save(media);
+      await this.addEvent.execute({
+        mediaId: media.id,
+        sourceKey: media.sourceKey,
+      });
 
       this.logger.log(
         CompleteUpload.name,

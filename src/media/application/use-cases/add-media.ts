@@ -6,9 +6,10 @@ import type { StoragePort } from '../ports/storage.port';
 import { Media, MediaType, PART_SIZE } from '../../domain';
 import { randomUUID } from 'node:crypto';
 import { PresignedPartUrl } from '../../infrastructure/adapters/s3-storage.adapter';
-import { AppLogger } from '../../../shared/infrastructure/logging/app-logger.service';
 import { APP_LOGGER } from '../../../shared/application/ports/logger.port';
 import type { LoggerPort } from '../../../shared/application/ports/logger.port';
+
+const BYTES_PER_MB = 1024 * 1024;
 
 export interface AddMediaInput {
   ownerId: string;
@@ -34,7 +35,7 @@ export class AddMedia {
     private readonly mediaRepository: MediaRepositoryPort,
     @Inject(STORAGE) private readonly storageService: StoragePort,
     @Inject(APP_LOGGER) private readonly logger: LoggerPort,
-  ) { }
+  ) {}
   async execute(input: AddMediaInput): Promise<AddMediaOutput> {
     const data = await this.mediaRepository.findByTitle(input.title);
     if (data?.length! > 0)
@@ -47,7 +48,7 @@ export class AddMedia {
       title: input.title,
       description: input.description,
       type: input.mediaType,
-      size: input.mediaSize,
+      size: Math.round(input.mediaSize * BYTES_PER_MB),
       totalParts: totalParts,
       isPrivate: input.isPrivate,
     });

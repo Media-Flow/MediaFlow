@@ -5,6 +5,7 @@ import { DrizzleEventRepository } from './infrastructure/adapters/drizzle-event.
 import { QUEUE } from './application/ports/queue.port';
 import { RabbitMQAdapter } from './infrastructure/adapters/rabbitmq.adapter';
 import { AddEvent } from './application/use-case/add-event';
+import { TranscodeOutbox } from './application/use-case/transcode.outbox';
 @Module({
   imports: [MessageQueueModule],
   providers: [
@@ -13,6 +14,7 @@ import { AddEvent } from './application/use-case/add-event';
       useClass: DrizzleEventRepository,
     },
     AddEvent,
+    TranscodeOutbox,
     {
       provide: QUEUE,
       useClass: RabbitMQAdapter,

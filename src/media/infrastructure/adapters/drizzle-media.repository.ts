@@ -146,6 +146,9 @@ export class DrizzleMediaRepository implements MediaRepositoryPort {
   }
 
   private applyFilter(filter: MediaFilter): SQL[] {
+    if (!filter) {
+      return [];
+    }
     const conditios: SQL[] = [];
     if (filter.includePrivate === false) {
       conditios.push(eq(media.isPrivate, false));
